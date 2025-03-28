@@ -26,7 +26,7 @@ router.route("/create").post(upload.any(), createTask);
 router.route("/complete/:taskId").post(completeTask);
 router.route("/:taskId").delete(deleteTask);
 
-// New route to get pending tasks by user ID
-router.route("/user/:userId/pending").get(getPendingTasksByUser);
+// New route to get pending tasks for the logged-in user
+router.route("/user/pending").get(getPendingTasksByUser);
 
 export default router;

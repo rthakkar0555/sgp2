@@ -3,6 +3,7 @@ import { Group } from "../models/group.models.js"
 import ApiError from "../utils/ApiError.js"
 import ApiResponse from "../utils/ApiRespons.js"
 import asyncHandler from "../utils/asyncHandler.js"
+import jwt from "jsonwebtoken"
 
 const createTask = asyncHandler(async (req, res) => {
     const { title, description, groupId, dueDate, points } = req.body
@@ -155,20 +156,30 @@ const deleteTask = asyncHandler(async (req, res) => {
     )
 })
 
-// New function to get all pending tasks for a user
+// New function to get all pending tasks for the logged-in user
 const getPendingTasksByUser = asyncHandler(async (req, res) => {
-    const { userId } = req.params
+    // Get the access token from cookies
+    const token = req.cookies.accessToken;
 
-    // Check if userId is provided
-    if (!userId) {
-        throw new ApiError(400, "User ID is required")
+    if (!token) {
+        throw new ApiError(401, "Access token is required");
     }
 
+    // Verify and decode the token to get the user ID
+    let decoded;
+    try {
+        decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    } catch (error) {
+        throw new ApiError(401, "Invalid access token");
+    }
+
+    const userId = decoded._id; // Extract user ID from the decoded token
+
     // Find all groups where the user is a member
-    const groups = await Group.find({ members: userId }).select("_id")
+    const groups = await Group.find({ members: userId }).select("_id");
 
     if (groups.length === 0) {
-        return res.status(200).json(new ApiResponse(200, [], "No groups found for this user"))
+        return res.status(200).json(new ApiResponse(200, [], "No groups found for this user"));
     }
 
     // Get all pending tasks from those groups
@@ -177,11 +188,11 @@ const getPendingTasksByUser = asyncHandler(async (req, res) => {
         status: "pending"
     })
     .populate("createdBy", "username")
-    .populate("group", "name")
+    .populate("group", "name");
 
     return res.status(200).json(
         new ApiResponse(200, tasks, "Pending tasks fetched successfully")
-    )
+    );
 })
 
 export {
