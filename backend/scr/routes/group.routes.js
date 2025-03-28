@@ -5,7 +5,8 @@ import {
     addMemberToGroup,
     getGroupDetails,
     removeMember,
-    joinGroup
+    joinGroup,
+    deleteGroup
 } from "../controllers/group.controller.js"
 import { upload } from "../middlewares/multer.middleware.js"
 import { verifyJWT } from "../middlewares/auth.middleware.js"
@@ -25,7 +26,7 @@ router.route("/join").post(joinGroup)
 router.route("/add-member").post(addMemberToGroup)
 
 // New routes
-router.route("/:groupId").get(getGroupDetails)
+router.route("/:groupId").get(getGroupDetails).delete(deleteGroup)
 router.route("/:groupId/members/:memberId").delete(removeMember)
 
 export default router 

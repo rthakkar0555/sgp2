@@ -1,13 +1,15 @@
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
-import multer from "multer";
+import { createServer } from "http";
+import { initSocket } from "./services/socket.service.js"
 import userRouter from "./routes/user.routes.js"
 import groupRouter from "./routes/group.routes.js"
 import taskRouter from "./routes/task.routes.js"
 import chatRouter from "./routes/chat.routes.js"
-const upload = multer()
+
 const app = express()
+const httpServer = createServer(app);
 
 // Middlewares
 app.use(cors({
@@ -19,6 +21,9 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static("public"))
 app.use(cookieParser())
+
+// Initialize Socket.IO
+const io = initSocket(httpServer);
 
 // Test route
 app.get("/", (req, res) => {
@@ -66,4 +71,4 @@ app.use((err, req, res, next) => {
     })
 })
 
-export { app }
+export { app, httpServer }

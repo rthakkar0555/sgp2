@@ -212,11 +212,35 @@ const joinGroup = asyncHandler(async (req, res) => {
     )
 })
 
+const deleteGroup = asyncHandler(async (req, res) => {
+    const { groupId } = req.params; // Get groupId from URL parameters
+    const userId = req.user._id; // Get the ID of the user making the request
+
+    // Find the group to delete
+    const group = await Group.findById(groupId);
+    if (!group) {
+        throw new ApiError(404, "Group not found");
+    }
+
+    // Check if the user is the admin of the group
+    if (group.admin.toString() !== userId.toString()) {
+        throw new ApiError(403, "You do not have permission to delete this group");
+    }
+
+    // Delete the group
+    await Group.findByIdAndDelete(groupId);
+
+    return res.status(200).json(
+        new ApiResponse(200, {}, "Group deleted successfully")
+    );
+})
+
 export {
     createGroup,
     getUserGroups,
     addMemberToGroup,
     getGroupDetails,
     removeMember,
-    joinGroup
+    joinGroup,
+    deleteGroup
 } 
