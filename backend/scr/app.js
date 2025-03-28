@@ -1,31 +1,69 @@
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
+import multer from "multer";
+import userRouter from "./routes/user.routes.js"
+import groupRouter from "./routes/group.routes.js"
+import taskRouter from "./routes/task.routes.js"
+import chatRouter from "./routes/chat.routes.js"
+const upload = multer()
+const app = express()
 
-
-const app=express()
-
+// Middlewares
 app.use(cors({
-   origin: process.env.CORS_ORIGIN,
-   credentials:true
+    origin: process.env.CORS_ORIGIN,
+    credentials: true
 }))
 
-app.use(express.json({
-  limit:"16kb"
-}))
-
-app.use(express.urlencoded({
-  limit:"16kb",
-  extended:true
-}))
-
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 app.use(express.static("public"))
-
 app.use(cookieParser())
 
-// router settings
-// import userrouter from "./routes/user.routes.js"
+// Test route
+app.get("/", (req, res) => {
+    res.send("Server is running!")
+})
 
-// app.use("/api/v1/users",userrouter)
+// Debug route to check if user routes are mounted
+app.get("/api/v1/test", (req, res) => {
+    res.json({ message: "API routes are working" })
+})
 
-export default app
+// API routes
+app.use("/api/v1/users", userRouter)
+app.use("/api/v1/groups", groupRouter)
+app.use("/api/v1/tasks", taskRouter)
+app.use("/api/v1/chat", chatRouter)
+
+// 404 handler
+app.use((req, res) => {
+    console.log(`404 - Not Found: ${req.method} ${req.url}`);
+    res.status(404).json({
+        success: false,
+        message: "API endpoint not found"
+    })
+})
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    const statusCode = err.statusCode || 500
+    const message = err.message || "Something went wrong!"
+    
+    console.error("Error:", {
+        path: req.path,
+        statusCode,
+        message,
+        stack: err.stack
+    })
+
+    res.status(statusCode).json({
+        success: false,
+        statusCode,
+        message,
+        data: null,
+        errors: err.errors || []
+    })
+})
+
+export { app }

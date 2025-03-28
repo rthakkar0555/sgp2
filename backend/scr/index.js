@@ -1,26 +1,35 @@
 import dotenv from "dotenv"
-import connectDb from "./db/index.js"
-import app from "./app.js"
+import connectDB from "./db/index.js"
+import { app } from "./app.js"
+import { createServer } from "http"
+import { initSocket } from "./services/socket.service.js"
 
 dotenv.config({
-  path:"./.env"
+    path: "./.env"
 })
- 
-const PORT=process.env.PORT||3000
-// datat base connection
-connectDb()
-.then(()=>{
-  app.on("error",(error)=>{
-    console.log("app can not talk to database || error shows up in main index file",error);
-    throw error 
-  }) 
+
+const httpServer = createServer(app)
+const io = initSocket(httpServer)
+
+const PORT = process.env.PORT || 8008
+
+// Connect to database and start server
+connectDB()
+.then(() => {
+    // Log available routes
+    console.log("\nRegistered Routes:")
+    app._router.stack.forEach((r) => {
+        if (r.route && r.route.path) {
+            console.log(`${Object.keys(r.route.methods)} ${r.route.path}`)
+        }
+    })
+
+    httpServer.listen(PORT, () => {
+        console.log(`\n⚙️ Server is running at port: ${PORT}`)
+        console.log(`Visit: http://localhost:${PORT}`)
+    })
 })
-.then(()=>{
-  app.listen(PORT,()=>{
-    console.log(`server is runing on port ${process.env.PORT}`)
-  })
-})
-.catch((err)=>{
-  console.error("database error in index file",err)
+.catch((err) => {
+    console.error("MONGO db connection failed !!!", err)
 })
 

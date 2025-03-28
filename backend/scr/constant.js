@@ -1,2 +1,1 @@
-const DB_NAME="studdyBuddy"
-export {DB_NAME}
+export const DB_NAME = "taskmanager"
