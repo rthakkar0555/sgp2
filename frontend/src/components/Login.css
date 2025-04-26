@@ -1,0 +1,99 @@
+/* Login.css */
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .header h1 {
+    font-size: 24px;
+    color: #333;
+  }
+  
+  .home-btn {
+    background: none;
+    border: none;
+    color: #31c62f;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .home-btn:hover {
+    text-decoration: underline;
+  }
+  
+  .login-form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+    text-align: left;
+  }
+  
+  .form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  
+  .login-btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    background-color: #53c149;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .login-btn:hover {
+    background-color: #14520b;
+  }
+  
+  .login-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .register-link {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .register-link a {
+    color: #134a1d;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .register-link a:hover {
+    text-decoration: underline;
+  }
+  

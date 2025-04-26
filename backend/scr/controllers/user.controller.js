@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken"
 
 const registerUser = asyncHandler(async (req, res) => {
     const { username, email, password, fullName } = req.body
-
+    console.log(req.body,username, email, password, fullName   )
     if ([username, email, password, fullName].some((field) => field?.trim() === "")) {
         throw new ApiError(400, "All fields are required")
     }
@@ -43,7 +43,7 @@ const registerUser = asyncHandler(async (req, res) => {
     if (!createdUser) {
         throw new ApiError(500, "Something went wrong while registering the user")
     }
-
+    
     return res.status(201).json(
         new ApiResponse(200, createdUser, "User registered successfully")
     )
@@ -51,7 +51,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body
-
+    console.log(req.body,email, password)
     if (!email || !password) {
         throw new ApiError(400, "Email and password are required")
     }

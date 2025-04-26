@@ -12,11 +12,14 @@ const app = express()
 const httpServer = createServer(app);
 
 // Middlewares
-app.use(cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true
-}))
-
+const corsOptions = {
+    origin: ['http://localhost:5173'], // Explicitly allow your React app's origin
+    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allowed methods
+    allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
+  };
+  
+  app.use(cors(corsOptions))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static("public"))

@@ -1,0 +1,82 @@
+/* nav-buttons.css */
+
+/* Container for navigation buttons */
+.nav-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+/* Common styles for both buttons */
+.nav-item-custom {
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 5px 15px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 80%;
+  max-width: 200px;
+}
+
+/* Specific styles for New Group button */
+.new-group-nav-btn {
+  background-color: #4CAF50; /* Green */
+  color: white;
+}
+
+.new-group-nav-btn:hover {
+  background-color: #45a049;
+  transform: translateY(-2px);
+}
+
+.new-group-nav-btn:active {
+  background-color: #3d8b40;
+  transform: translateY(0);
+}
+
+/* Specific styles for Join Group button */
+.join-group-nav-btn {
+  background-color: #2196F3; /* Blue */
+  color: white;
+}
+
+.join-group-nav-btn:hover {
+  background-color: #1e87db;
+  transform: translateY(-2px);
+}
+
+.join-group-nav-btn:active {
+  background-color: #1a76c2;
+  transform: translateY(0);
+}
+
+/* Disabled state for both buttons */
+.nav-item-custom:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .nav-item-custom {
+      padding: 8px 15px;
+      font-size: 14px;
+      margin: 5px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-item-custom {
+      padding: 6px 12px;
+      font-size: 12px;
+      margin: 5px 8px;
+  }
+}
