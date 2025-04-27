@@ -14,6 +14,7 @@ const GroupsList = ({
   onDeleteTask,
 }) => {
   const [viewMode, setViewMode] = useState("tasks"); // "tasks" or "chat"
+  const [addingTask, setAddingTask] = useState(false);
 
   if (selectedGroup) {
     const groupTasks = tasks.filter((task) => task.groupId === selectedGroup.id);
@@ -44,18 +45,19 @@ const GroupsList = ({
           <>
             <form
               className="add-task-form"
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
                 const taskName = e.target.taskName.value;
                 const taskDescription = e.target.taskDescription.value;
                 const dueDate = e.target.dueDate.value;
                 if (taskName) {
-                  onAddTask(selectedGroup.id, taskName, taskDescription, dueDate);
-                  e.target.taskName.value = "";
-                  e.target.taskDescription.value = "";
-                  e.target.dueDate.value = "";
+                  setAddingTask(true);
+                  await onAddTask(selectedGroup.id, taskName, taskDescription, dueDate);
+                  e.target.reset();
+                  setAddingTask(false);
                 }
               }}
+              
             >
               <div className="form-row">
                 <div className="form-group task-name-group">
@@ -83,9 +85,11 @@ const GroupsList = ({
                     required
                   />
                 </div>
-                <button type="submit" className="add-task-btn">
-                  <span className="btn-icon">+</span> Add Task
+                <button type="submit" className="add-task-btn" disabled={addingTask}>
+                   {addingTask ? "Adding..." : (<><span className="btn-icon">+</span> Add Task</>)}
                 </button>
+
+
               </div>
             </form>
             <ul className="group-tasks-list">

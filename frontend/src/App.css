@@ -555,6 +555,7 @@ h2 {
   border-radius: 5px;
   cursor: pointer;
   font-size: 0.95rem;
+  margin:5px
 }
 
 .join-group-btn:hover {
@@ -589,6 +590,7 @@ h2 {
   border-radius: 5px;
   cursor: pointer;
   font-size: 0.95rem;
+  margin:5px
 }
 
 .new-group-btn {

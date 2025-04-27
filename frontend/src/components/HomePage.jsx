@@ -33,6 +33,38 @@ const HomePage = () => {
   });
 
   useEffect(() => {
+    const fetchPendingTasks = async () => {
+      try {
+        const response = await fetch("http://localhost:8008/api/v1/tasks/user/pending", {
+          method: "GET",
+          credentials: "include", // <-- IMPORTANT!! This automatically sends the cookies.
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+  
+        const result = await response.json();
+  
+        if (result.success) {
+          const transformedTasks = result.data.map((task) => ({
+            id: task._id,
+            groupId: task.group._id,
+            text: task.title,
+            description: task.description,
+            due: task.dueDate.split("T")[0],
+            completed: false,
+          }));
+          setTasks(transformedTasks);
+        } else {
+          console.error("Failed to fetch tasks:", result.message);
+        }
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      }
+    };
+  
+    fetchPendingTasks();
+  
     const fetchUserGroups = async () => {
       try {
         setLoading(true);
@@ -138,30 +170,71 @@ const HomePage = () => {
     ]);
   };
 
-  const addTask = (groupId, taskName, taskDescription, dueDate) => {
-    const newTask = {
-      id: tasks.length + 1,
-      groupId,
-      text: taskName,
-      description: taskDescription,
-      due: dueDate,
-      completed: false,
-    };
-    setTasks([...tasks, newTask]);
-    setGroups((prevGroups) =>
-      prevGroups.map((group) =>
-        group.id === groupId ? { ...group, tasks: group.tasks + 1 } : group
-      )
-    );
-    setActivities([
-      {
-        id: activities.length + 1,
-        text: `Added task "${taskName}" to group "${groups.find((g) => g.id === groupId).name}"`,
-        date: new Date().toLocaleDateString(),
-      },
-      ...activities,
-    ]);
+  const addTask = async (groupId, taskName, taskDescription, dueDate) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+  
+      if (!accessToken) {
+        alert("Authentication required. Please login again.");
+        window.location.href = "/login";
+        return;
+      }
+  
+      const formdata = new FormData();
+      formdata.append("title", taskName);
+      formdata.append("description", taskDescription);
+      formdata.append("groupId", groupId);
+      formdata.append("dueDate", dueDate);
+      formdata.append("points", "10");
+  
+      const requestOptions = {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: formdata,
+        redirect: "follow",
+      };
+  
+      const response = await fetch("http://localhost:8008/api/v1/tasks/create", requestOptions);
+      const result = await response.json();
+  
+      if (result.success) {
+        const newTask = {
+          id: result.data._id,
+          groupId: result.data.group._id,
+          text: result.data.title,
+          description: result.data.description,
+          due: result.data.dueDate.split("T")[0],
+          completed: false,
+        };
+  
+        setTasks((prevTasks) => [...prevTasks, newTask]);
+  
+        setGroups((prevGroups) =>
+          prevGroups.map((group) =>
+            group.id === newTask.groupId ? { ...group, tasks: group.tasks + 1 } : group
+          )
+        );
+  
+        setActivities((prevActivities) => [
+          {
+            id: prevActivities.length + 1,
+            text: `Added task "${taskName}" to group "${groups.find((g) => g.id === groupId)?.name || "Unknown Group"}"`,
+            date: new Date().toLocaleDateString(),
+          },
+          ...prevActivities,
+        ]);
+      } else {
+        alert("Failed to add task: " + result.message);
+      }
+    } catch (error) {
+      console.error("Error adding task:", error);
+      alert("Error adding task, check console.");
+    }
   };
+  
+  
 
   const completeTask = (taskId) => {
     setTasks((prevTasks) =>
@@ -272,6 +345,19 @@ const HomePage = () => {
           <button className="nav-item" onClick={() => setShowChatModal(true)}>
             Chat
           </button>
+          <button
+                className="join-group-btn"
+                onClick={() => setShowModal(true)}
+              >
+                Join Group
+              </button>
+              
+              <button
+                className="new-group-btn " 
+                onClick={() => setShowCreateGroupModal(true)}
+              >
+                New Group
+              </button>
         </nav>
       </aside>
 
@@ -377,18 +463,8 @@ const HomePage = () => {
             </ul>
 
             <div className="dashboard-buttons">
-              <button
-                className="join-group-btn"
-                onClick={() => setShowModal(true)}
-              >
-                Join Group
-              </button>
-              <button
-                className="new-group-btn"
-                onClick={() => setShowCreateGroupModal(true)}
-              >
-                New Group
-              </button>
+            
+             
             </div>
           </>
         )}
