@@ -94,6 +94,7 @@ const GroupsList = ({
             </form>
             <ul className="group-tasks-list">
               {groupTasks.map((task) => (
+
                 <li
                   key={task.id}
                   className={`task-item ${task.completed ? "completed" : ""}`}

@@ -9,6 +9,7 @@ const Login = ({ onClose = () => {}, onLogin = () => {} }) => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -65,6 +66,7 @@ const Login = ({ onClose = () => {}, onLogin = () => {} }) => {
 
         alert("Login successful!");
         onLogin(userData);
+        localStorage.setItem("userId",JSON.stringify(result.data.user._id))
         localStorage.setItem("user", JSON.stringify(result.data.user.fullName));
         localStorage.setItem("userEmail", JSON.stringify(result.data.user.email));
         localStorage.setItem("userimg", JSON.stringify(result.data.user.avatar));

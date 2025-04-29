@@ -31,29 +31,47 @@ const HomePage = () => {
     email: "",
     avatar: defaultGroupImg
   });
-
+  const [currentUserId, setCurrentUserId] = useState(null);
+  useEffect(() => {
+    const storedId = JSON.parse(localStorage.getItem("userId"));
+    setCurrentUserId(storedId);
+  }, []);
   useEffect(() => {
     const fetchPendingTasks = async () => {
       try {
+        const currentUserId = JSON.parse(localStorage.getItem("userId"));
+        if (!currentUserId) {
+          console.error("User ID not found in localStorage.");
+          return;
+        }
+    
         const response = await fetch("http://localhost:8008/api/v1/tasks/user/pending", {
           method: "GET",
-          credentials: "include", // <-- IMPORTANT!! This automatically sends the cookies.
+          credentials: "include", // Sends cookies automatically
           headers: {
             "Content-Type": "application/json",
           },
         });
-  
+    
         const result = await response.json();
-  
+    
         if (result.success) {
-          const transformedTasks = result.data.map((task) => ({
-            id: task._id,
-            groupId: task.group._id,
-            text: task.title,
-            description: task.description,
-            due: task.dueDate.split("T")[0],
-            completed: false,
-          }));
+          const transformedTasks = result.data.map((task) => {
+            const completedEntry = task.completedBy.find(
+              (entry) => entry.user === currentUserId
+            );
+    
+            return {
+              id: task._id,
+              groupId: task.group._id,
+              text: task.title,
+              description: task.description,
+              due: task.dueDate.split("T")[0],
+              completed: !!completedEntry,
+              completedAt: completedEntry?.completedAt || null,
+            };
+          });
+    
           setTasks(transformedTasks);
         } else {
           console.error("Failed to fetch tasks:", result.message);
@@ -62,6 +80,7 @@ const HomePage = () => {
         console.error("Error fetching tasks:", error);
       }
     };
+    
   
     fetchPendingTasks();
   
@@ -236,22 +255,58 @@ const HomePage = () => {
   
   
 
-  const completeTask = (taskId) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === taskId ? { ...task, completed: true } : task
-      )
-    );
-    const task = tasks.find((t) => t.id === taskId);
-    setActivities([
-      {
-        id: activities.length + 1,
-        text: `Completed task "${task.text}" in group "${groups.find((g) => g.id === task.groupId).name}"`,
-        date: new Date().toLocaleDateString(),
+  const completeTask = async (taskId) => {
+    const accessToken = localStorage.getItem("accessToken");
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        // Include auth headers if needed
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${accessToken}`, // replace `yourToken` with actual token variable
       },
-      ...activities,
-    ]);
+      redirect: "follow",
+    };
+  
+    try {
+      const response = await fetch(
+        `http://localhost:8008/api/v1/tasks/complete/${taskId}`,
+        requestOptions
+      );
+  
+      const result = await response.json();
+  
+      if (!result.success) {
+        console.error("Error completing task:", result.message);
+        alert(result.message); // Show an alert or toast message to user
+        return;
+      }
+  
+      // Update local state only if API call is successful
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id === taskId ? { ...task, completed: true } : task
+        )
+      );
+  
+      const task = tasks.find((t) => t.id === taskId);
+      const group = groups.find((g) => g.id === task.groupId);
+  
+      if (task && group) {
+        setActivities((prevActivities) => [
+          {
+            id: prevActivities.length + 1,
+            text: `Completed task "${task.text}" in group "${group.name}"`,
+            date: new Date().toLocaleDateString(),
+          },
+          ...prevActivities,
+        ]);
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      alert("An unexpected error occurred. Please try again.");
+    }
   };
+  
 
   const deleteTask = (taskId) => {
     const task = tasks.find((t) => t.id === taskId);
