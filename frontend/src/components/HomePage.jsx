@@ -308,23 +308,69 @@ const HomePage = () => {
   };
   
 
-  const deleteTask = (taskId) => {
+  const deleteTask = async (taskId) => {
+    const accessToken = localStorage.getItem("accessToken");
+  
+    if (!accessToken) {
+      toast.error("Authentication required. Please login again.");
+      window.location.href = "/login";
+      return;
+    }
+  
     const task = tasks.find((t) => t.id === taskId);
-    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
-    setGroups((prevGroups) =>
-      prevGroups.map((group) =>
-        group.id === task.groupId ? { ...group, tasks: group.tasks - 1 } : group
-      )
-    );
-    setActivities([
-      {
-        id: activities.length + 1,
-        text: `Deleted task "${task.text}" from group "${groups.find((g) => g.id === task.groupId).name}"`,
-        date: new Date().toLocaleDateString(),
-      },
-      ...activities,
-    ]);
+  
+    if (!task) {
+      toast.error("Task not found in local state.");
+      return;
+    }
+  
+    try {
+      const requestOptions = {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+        },
+        redirect: "follow",
+      };
+  
+      const response = await fetch(
+        `http://localhost:8008/api/v1/tasks/${taskId}`,
+        requestOptions
+      );
+  
+      const result = await response.json();
+  
+      if (!result.success) {
+        //toast.error(`Failed to delete task: ${result.message || "Unknown error"}`);
+        console.error("Delete failed:", result);
+        return;
+      }
+  
+      // ✅ Backend confirmed deletion — update frontend state
+      setTasks((prevTasks) => prevTasks.filter((t) => t.id !== taskId));
+      setGroups((prevGroups) =>
+        prevGroups.map((group) =>
+          group.id === task.groupId
+            ? { ...group, tasks: Math.max(0, group.tasks - 1) }
+            : group
+        )
+      );
+      setActivities((prevActivities) => [
+        {
+          id: prevActivities.length + 1,
+          text: `Deleted task "${task.text}" from group "${groups.find((g) => g.id === task.groupId)?.name || "Unknown Group"}"`,
+          date: new Date().toLocaleDateString(),
+        },
+        ...prevActivities,
+      ]);
+  
+      //toast.success(`Task "${task.text}" deleted successfully.`);
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      //toast.error("An unexpected error occurred while deleting the task.");
+    }
   };
+  
 
   const handleGroupCreated = (groupData) => {
     setGroups((prevGroups) => [
