@@ -2,12 +2,14 @@
 .chat-container {
   display: flex;
   flex-direction: column;
-  height: 200px; /* Reduced height to fit multiple chats in the modal */
+  height: 500px; /* Increased height */
+  max-height: 80vh; /* Responsive scaling */
   border: 1px solid #ddd;
   border-radius: 8px;
   background: white;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 1rem;
+  overflow: hidden;
 }
 
 .messages-list {
@@ -17,6 +19,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-height: 300px; /* Ensures it can grow */
 }
 
 .message {
@@ -24,10 +27,11 @@
   padding: 0.5rem 1rem;
   border-radius: 15px;
   position: relative;
+  word-wrap: break-word;
 }
 
 .message-sent {
-  background-color: #6b5b95; /* Purple shade to match CreateGroup button */
+  background-color: #6b5b95;
   color: white;
   align-self: flex-end;
 }
@@ -83,6 +87,10 @@
   box-shadow: 0 0 5px rgba(107, 91, 149, 0.3);
 }
 
+.file-input {
+  max-width: 160px;
+}
+
 .send-btn {
   padding: 0.6rem 1rem;
   background-color: #6b5b95;
@@ -104,9 +112,16 @@
   margin: 0;
 }
 
-/* New styles for the chat modal in HomePage.jsx */
+.typing-indicator {
+  font-size: 0.7rem;
+  color: #888;
+  margin-left: 0.2rem;
+  font-style: italic;
+}
+
+/* Chat modal improvements */
 .chat-modal {
-  max-width: 600px; /* Wider modal to accommodate chat sections */
+  max-width: 600px;
   width: 100%;
   max-height: 80vh;
   overflow-y: auto;
